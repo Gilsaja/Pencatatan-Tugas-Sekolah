@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pencatatan Tugas Sekolah Sederhana</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Verdana', sans-serif;
+            margin: 50px;
+            padding: 30px;
+            background-image: url('https://geraknews.com/wp-content/uploads/2022/02/IMG-20220204-WA0020-768x565.jpg');
+            background-size: cover; 
+            background-position: center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            color: #333;
+        }
+        .login-container, #task-container {
+            display: none;
+            background: rgba(255, 255, 255, 0.5);
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            margin: auto;
+            max-width: 800px;
+            text-align: center;
+        }
+        input {
+            padding: 10px;
+            width: 80%;
+            margin-bottom: 10px;
+            border: 1px solid #bdc3c7;
+            border-radius: 5px;
+            transition: border-color 0.3s;
+        }
+        input:focus {
+            border-color: #3498db;
+            outline: none;
+        }
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            cursor: pointer;
+            padding: 10px;
+            width: 85%;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        h1 {
+            text-align: center;
+            color: white;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+        }
+        #task-form {
+            display: flex;
+            flex-direction: column;
+            align-items: center; 
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            background: rgba(255, 255, 255, 0.8);
+        }
+        #task-list {
+            display: flex;
+            flex-wrap: wrap;
+            margin-top: 20px;
+            padding: 0;
+            list-style-type: none;
+        }
+        .task-item {
+            flex: 0 0 calc(33.33% - 10px);
+            margin-right: 5px;
+            margin-bottom: 10px;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            position: relative;
+            box-sizing: border-box;
+        }
+        .delete-btn {
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            padding: 5px 5px;
+            cursor: pointer;
+            border-radius: 5px;
+            position: relative;
+            top: 10px;
+            right: 5px;
+            font-size: 14px;
+            min-width: 50px;
+            text-align: center;
+        }
+        .delete-btn:hover {
+            background-color: #c0392b;
+        }
+        .menu {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            cursor: pointer;
+            font-size: 24px;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="menu" id="menu-button">
+        <i class="fas fa-ellipsis-v"></i>
+    </div>
+
+    <div class="login-container" id="login-container">
+        <h2>Login</h2>
+        <input type="text" id="username" placeholder="Username" required>
+        <input type="password" id="password" placeholder="Password" required>
+        <button id="login-button">Masuk</button>
+        <p id="error-message" style="color: red; display: none;"></p>
+    </div>
+
+    <div class="task-container" id="task-container">
+        <h1>Pencatatan Tugas Sekolah Sederhana</h1>
+        <div id="task-form">
+            <h2>Tambahkan Catatan Tugas Baru</h2>
+            <input type="text" id="title-input" placeholder="Judul Tugas..." required>
+            <input type="text" id="description-input" placeholder="Deskripsi Tugas..." required>
+            <input type="datetime-local" id="due-date-input" required placeholder="Tenggat Waktu...">
+            <button id="add-task"><i class="fas fa-plus"></i> Tambah Tugas</button>
+        </div>
+        <div>
+            <h2>Daftar Tugas</h2>
+            <ul id="task-list"></ul>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('login-container').style.display = 'block';
+        
+        document.getElementById('login-button').addEventListener('click', function() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            
+            if (username === "Kelompok6" && password === "Grup6") {
+                document.getElementById('login-container').style.display = 'none';
+                document.getElementById('task-container').style.display = 'block';
+                loadTasks();
+            } else {
+                document.getElementById('error-message').innerText = "Username atau Password salah!";
+                document.getElementById('error-message').style.display = "block";
+            }
+        });
+
+        document.getElementById('add-task').addEventListener('click', function() {
+            const titleInput = document.getElementById('title-input');
+            const descriptionInput = document.getElementById('description-input');
+            const dueDateInput = document.getElementById('due-date-input');
+
+            const taskTitle = titleInput.value.trim();
+            const taskDescription = descriptionInput.value.trim();
+            const dueDate = dueDateInput.value;
+
+            if (taskTitle && taskDescription && dueDate) {
+                const now = new Date();
+                if (new Date(dueDate) <= now) {
+                    alert("Tenggat waktu harus lebih dari waktu saat ini.");
+                    return;
+                }
+
+                const task = { id: Date.now(), title: taskTitle, description: taskDescription, dueDate: dueDate };
+                addTask(task);
+                saveTask(task);
+                titleInput.value = '';
+                descriptionInput.value = '';
+                dueDateInput.value = '';
+            }
+        });
+
+        function addTask(task) {
+            const taskList = document.getElementById('task-list');
+            const listItem = document.createElement('li');
+            listItem.className = 'task-item';
+
+            const endTime = new Date(task.dueDate);
+            const now = new Date();
+            const timeRemaining = endTime - now;
+
+            listItem.innerHTML = `
+                <strong>${task.title}</strong>
+                <div>${task.description}</div>
+                <div>Tenggat: ${endTime.toLocaleString()}</div>
+                <div>Waktu Berakhir: ${timeRemaining > 0 ? (timeRemaining / (1000 * 60 * 60)).toFixed(2) + ' jam lagi' : 'Tugas telah berakhir'}</div>
+            `;
+
+            const deleteButton = document.createElement('button');
+            deleteButton.textContent = 'Hapus';
+            deleteButton.className = 'delete-btn';
+            deleteButton.onclick = function() {
+                if (confirm("Apakah Anda yakin ingin menghapus tugas ini?")) {
+                    taskList.removeChild(listItem);
+                    removeTask(task.id); // Hapus dari penyimpanan
+                }
+            };
+
+            listItem.appendChild(deleteButton);
+            taskList.appendChild(listItem);
+
+            // Tandai tugas yang sudah lewat
+            if (timeRemaining <= 0) {
+                listItem.style.backgroundColor = '#ffcccc'; // Tugas telah berakhir
+            }
+        }
+
+        function saveTask(task) {
+            let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+            tasks.push(task);
+            localStorage.setItem('tasks', JSON.stringify(tasks));
+        }
+
+        function loadTasks() {
+            let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+            tasks.forEach(task => addTask(task));
+        }
+
+        function removeTask(id) {
+            let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+            tasks = tasks.filter(task => task.id !== id);
+            localStorage.setItem('tasks', JSON.stringify(tasks));
+        }
+
+        document.getElementById('menu-button').addEventListener('click', function() {
+            const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+            alert(`Catatan Tugas:\n\n${tasks.map(task => `Judul: ${task.title}\nDeskripsi: ${task.description}\nTenggat: ${new Date(task.dueDate).toLocaleString()}\n`).join('\n') || 'Tidak ada catatan tugas.'}`);
+        });
+    </script>
+
+</body>
+</html>
